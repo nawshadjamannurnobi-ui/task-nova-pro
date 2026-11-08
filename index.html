@@ -1,0 +1,288 @@
+
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TASK NOVA PRO</title>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#0b1020;color:white}
+header{padding:18px 5%;background:#111a30;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.logo{font-size:21px;font-weight:bold;color:#a78bfa}
+nav a{color:white;text-decoration:none;margin-left:12px;font-size:14px}
+.hero{text-align:center;padding:65px 15px;background:linear-gradient(135deg,#312e81,#111827)}
+.hero h1{font-size:32px;margin-bottom:15px}
+.hero p{color:#ddd;line-height:1.8}
+.container{max-width:1000px;margin:auto;padding:30px 5%}
+.card{background:#17213a;border:1px solid #293653;border-radius:13px;padding:22px;margin:15px 0}
+h2{margin-bottom:15px;color:#c4b5fd}
+input{width:100%;padding:13px;margin:8px 0;background:#0b1020;border:1px solid #394867;border-radius:8px;color:white}
+button{padding:12px 18px;background:#7c3aed;color:white;border:0;border-radius:8px;font-weight:bold;cursor:pointer;margin:5px 3px}
+button.alt{background:#26334e}
+.hidden{display:none!important}
+.msg{margin:12px 0;color:#fbbf24;line-height:1.5;overflow-wrap:anywhere}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px}
+.stat{background:#111a30;padding:18px;border-radius:10px}
+footer{text-align:center;padding:25px;background:#111827;color:#9ca3af}
+</style>
+</head>
+
+<body>
+
+<header>
+<div class="logo">TASK NOVA PRO</div>
+<nav>
+<a href="#home">Home</a>
+<a href="#account">Account</a>
+<a href="#dashboard">Dashboard</a>
+</nav>
+</header>
+
+<section class="hero" id="home">
+<h1>Welcome to TASK NOVA PRO</h1>
+<p>
+Complete Tasks. Learn New Skills. Earn Rewards.<br>
+আপনার অনলাইন কাজের যাত্রা শুরু করুন।
+</p>
+<button onclick="showAccount()">Get Started</button>
+</section>
+
+<div class="container">
+
+<section id="account" class="card">
+<h2>Account Registration / Login</h2>
+<p>নতুন অ্যাকাউন্ট তৈরি করুন অথবা আপনার অ্যাকাউন্টে প্রবেশ করুন।</p>
+
+<input id="name" type="text" placeholder="আপনার সম্পূর্ণ নাম">
+<input id="email" type="email" placeholder="Email Address">
+<input id="password" type="password" placeholder="Password (কমপক্ষে ৬ অক্ষর)">
+
+<div>
+<button onclick="registerUser()">Register</button>
+<button class="alt" onclick="loginUser()">Login</button>
+</div>
+
+<p id="message" class="msg"></p>
+</section>
+
+<section id="dashboard" class="card hidden">
+<h2>User Dashboard</h2>
+<p id="welcome">Welcome!</p>
+
+<div class="stats">
+<div class="stat">
+<h3>৳0.00</h3>
+<p>Total Balance</p>
+</div>
+
+<div class="stat">
+<h3>0</h3>
+<p>Completed Tasks</p>
+</div>
+
+<div class="stat">
+<h3>0</h3>
+<p>Referrals</p>
+</div>
+</div>
+
+<p class="msg">
+এটি প্রাথমিক Dashboard। প্রকৃত ব্যালেন্স ও কাজের তথ্য পরে নিরাপদ Database থেকে যুক্ত হবে।
+</p>
+
+<button onclick="logoutUser()">Logout</button>
+</section>
+
+<section class="card">
+<h2>Available Opportunities</h2>
+<p>এখানে ভবিষ্যতে যাচাইকৃত Micro Jobs, Surveys, Quizzes এবং অন্যান্য কাজ যুক্ত হবে।</p>
+</section>
+
+<section class="card">
+<h2>About TASK NOVA PRO</h2>
+<p>
+একটি অনলাইন টাস্ক ও দক্ষতা উন্নয়ন প্ল্যাটফর্ম।
+আয় ও পুরস্কার বাস্তব কাজ এবং যাচাইকৃত কার্যক্রমের ভিত্তিতে নির্ধারিত হবে।
+</p>
+</section>
+
+</div>
+
+<footer>© 2026 TASK NOVA PRO. All rights reserved.</footer>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
+
+import {
+getAuth,
+createUserWithEmailAndPassword,
+signInWithEmailAndPassword,
+signOut,
+onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
+
+import {
+getFirestore,
+doc,
+setDoc,
+getDoc,
+serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
+
+
+const firebaseConfig = {
+apiKey: "AIzaSyBUMz5bxbu9gPFQXiO2RDxy5XOgspyi3RY",
+authDomain: "task-nova-pro-92067.firebaseapp.com",
+projectId: "task-nova-pro-92067",
+storageBucket: "task-nova-pro-92067.firebasestorage.app",
+messagingSenderId: "1042563383468",
+appId: "1:1042563383468:web:aa8a5da0eb60c3a861df09"
+};
+
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const nameInput = document.getElementById("name");
+const emailInput = document.getElementById("email");
+const passwordInput = document.getElementById("password");
+const message = document.getElementById("message");
+const dashboard = document.getElementById("dashboard");
+const account = document.getElementById("account");
+
+
+window.showAccount = () => {
+account.scrollIntoView({behavior:"smooth"});
+};
+
+
+window.registerUser = async () => {
+
+let userCreated = false;
+
+try {
+
+const name = nameInput.value.trim();
+const email = emailInput.value.trim();
+const password = passwordInput.value;
+
+if(!name){
+throw new Error("আপনার সম্পূর্ণ নাম লিখুন।");
+}
+
+if(!email || password.length < 6){
+throw new Error("সঠিক Email ও কমপক্ষে ৬ অক্ষরের Password দিন।");
+}
+
+message.textContent = "অ্যাকাউন্ট তৈরি হচ্ছে...";
+
+const credential = await createUserWithEmailAndPassword(
+auth,
+email,
+password
+);
+
+userCreated = true;
+
+await setDoc(doc(db,"users",credential.user.uid),{
+uid: credential.user.uid,
+email: credential.user.email,
+displayName: name,
+createdAt: serverTimestamp()
+});
+
+message.textContent = "Registration সফল হয়েছে! আপনার তথ্য Database-এ সংরক্ষিত হয়েছে।";
+
+} catch(error) {
+
+if(userCreated){
+message.textContent =
+"অ্যাকাউন্ট তৈরি হয়েছে, কিন্তু Profile Database-এ সংরক্ষণ হয়নি। Error: " + error.message;
+} else {
+message.textContent = "সমস্যা: " + error.message;
+}
+
+}
+
+};
+
+
+window.loginUser = async () => {
+
+try {
+
+const email = emailInput.value.trim();
+const password = passwordInput.value;
+
+if(!email || !password){
+throw new Error("Email ও Password দিন।");
+}
+
+await signInWithEmailAndPassword(auth,email,password);
+
+message.textContent = "Login সফল হয়েছে!";
+
+} catch(error) {
+
+message.textContent = "Login হয়নি: " + error.message;
+
+}
+
+};
+
+
+window.logoutUser = async () => {
+
+try {
+await signOut(auth);
+message.textContent = "Logout সফল হয়েছে।";
+} catch(error) {
+message.textContent = "সমস্যা: " + error.message;
+}
+
+};
+
+
+onAuthStateChanged(auth, async user => {
+
+if(user){
+
+dashboard.classList.remove("hidden");
+account.classList.add("hidden");
+
+let displayName = user.email;
+
+try {
+
+const profile = await getDoc(doc(db,"users",user.uid));
+
+if(profile.exists()){
+displayName = profile.data().displayName || user.email;
+}
+
+} catch(error) {
+
+console.error("Profile read error:",error);
+
+}
+
+document.getElementById("welcome").textContent =
+"স্বাগতম, " + displayName;
+
+} else {
+
+dashboard.classList.add("hidden");
+account.classList.remove("hidden");
+
+}
+
+});
+
+</script>
+
+</body>
+</html>
